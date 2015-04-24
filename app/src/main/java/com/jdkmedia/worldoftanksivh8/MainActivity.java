@@ -1,59 +1,43 @@
 package com.jdkmedia.worldoftanksivh8;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.webkit.WebView;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.EditText;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    ArrayList<Player> playersList;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    ArrayList<Player> playersList;
-
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
@@ -66,12 +50,7 @@ public class MainActivity extends ActionBarActivity
         //First call the query with dynamic parameter
         //Secondly put this info somewhere on a screen
 
-        playersList = new ArrayList<>();
-        new JSONAsyncTask().execute("http://api.worldoftanks.eu/wot/account/list/?application_id=74da03a344137eb2756c49c9e9069092&search=database");
 
-        for (Player item : playersList) {
-            Log.i("MainActivity ItemList", item.toString());
-        }
         setContentView(R.layout.activity_main);
 
 
@@ -85,7 +64,21 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
+    public void getPlayers(View view) {
+        //Get text from field
+        EditText editText = (EditText) findViewById(R.id.search_query);
+        String query = editText.getText().toString();
 
+        //Create new ist
+        playersList = new ArrayList<>();
+
+        //Call api
+        new JSONAsyncTask().execute("http://api.worldoftanks.eu/wot/account/list/?application_id=74da03a344137eb2756c49c9e9069092&search=" + query);
+
+        for (Player item : playersList) {
+            Log.i("MainActivity ItemList", item.toString());
+        }
+    }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -156,6 +149,9 @@ public class MainActivity extends ActionBarActivity
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        public PlaceholderFragment() {
+        }
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -166,9 +162,6 @@ public class MainActivity extends ActionBarActivity
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
-        }
-
-        public PlaceholderFragment() {
         }
 
         @Override
@@ -245,7 +238,7 @@ public class MainActivity extends ActionBarActivity
         }
 
         protected void onPostExecute(Boolean result) {
-            if(result == false) {
+            if (!result) {
                 //Toast.makeText(getApplicationContext(), "Unable to fetch data from server", Toast.LENGTH_LONG).show();
             }
         }
